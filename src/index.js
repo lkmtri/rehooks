@@ -47,7 +47,7 @@ function useObserveRect(ref, callback) {
 }
 
 function useInterval(callback, timeout) {
-  const [play, setPlay] = React.useState(true);
+  const [play, togglePlay] = useBoolean(true);
 
   React.useEffect(
     () => {
@@ -59,7 +59,7 @@ function useInterval(callback, timeout) {
     [timeout, callback, play]
   );
 
-  return [play, setPlay];
+  return [play, togglePlay];
 }
 
 function useInput(initialValue = '') {
@@ -68,29 +68,32 @@ function useInput(initialValue = '') {
   return { value, onChange };
 }
 
+function useBoolean(initialValue) {
+  const [value, setValue] = React.useState(initialValue);
+  return [value, () => setValue(!value)];
+}
+
 function App() {
   const [counter, setCounter] = React.useState(0);
   const [size, setSize] = React.useState({});
   const ref = React.useRef();
 
-  const increaseCounter = () => setCounter(counter + 1);
-
-  useWindowEvents('mousedown', increaseCounter);
+  useWindowEvents('mousedown', console.log);
 
   useObserveRect(ref, setSize);
 
   const inputProps = useInput(1000);
 
-  const [play, setPlay] = useInterval(increaseCounter, inputProps.value);
+  const increaseCounter = () => setCounter(counter + 1);
+
+  const [play, togglePlay] = useInterval(increaseCounter, inputProps.value);
 
   return (
     <div ref={ref} className="App">
-      <h1>Hello CodeSandbox</h1>
       <span>{counter}</span>
       <span>{JSON.stringify(size)}</span>
       <input {...inputProps} type="number" />
-      <button onClick={() => setPlay(!play)}>Toggle</button>
-      <h2>Start editing to see some magic happen!</h2>
+      <button onClick={togglePlay}>{play ? 'Pause' : 'Play'}</button>
     </div>
   );
 }
